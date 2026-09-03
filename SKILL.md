@@ -31,7 +31,7 @@ Clarify only if it materially changes the result. Otherwise infer the scope from
 - For accepted work in a named supported conference, use `https://papers.cool/venue/<venue>.<year>` (for example, `NeurIPS.2025`). `https://papers.cool/venue/<venue>` resolves to its newest indexed edition. Read the venue notes in the source guide before presenting it as exhaustive.
 - The direct helper's default `search` mode calls both `/arxiv/search` and `/venue/search`, serially with the required delay. Its `--branch arxiv` or `--branch venue` switch is only for an explicitly scoped request. The onsite index searches title and abstract text.
 - papers.cool's browser **Prefer** feature is personal browser-local storage. In automated work, ask for or infer a small set of user-approved preference terms and pass them as `--prefer "term1,term2"`. The helper performs transparent client-side ranking and writes each paper's `preference_score`; it does not claim to reproduce the user's private browser profile.
-- papers.cool's **[REL]** control opens a same-collection `search?query=<card keywords>` page. It is useful for a bounded, one-hop related-paper expansion, but it is a card-keyword search—not a citation graph, co-citation result, or embedding-based similarity score. Use `related arxiv/<id>` (or a papers.cool paper URL) for a supplied seed. For a first-round list, require an explicit `--related-top 1` through `3`; the default is `0`. Never run REL recursively.
+- papers.cool's **[REL]** control opens a same-collection `search?query=<card keywords>` page. It is useful for a bounded, one-hop related-paper expansion, but it is a card-keyword search—not a citation graph, co-citation result, or embedding-based similarity score. Use `related arxiv/<id>` (or a papers.cool paper URL) for a supplied seed. For a first-round list, require an explicit `--related-top 1` through `5`; the default is `0`. Never run REL recursively.
 
 ## Gather and verify
 
@@ -58,4 +58,3 @@ When data will feed another tool, return the normalized JSON directly or attach 
 ## Freshness and coverage limits
 
 papers.cool mirrors arXiv updates with a typical delay of up to about ten minutes, normally updating around 10:00 Beijing time on weekdays; schedules can shift and there are no weekend or some holiday updates. Its historical arXiv records are substantial but not guaranteed complete, and its conference collections are manually curated. Mention either limitation when freshness or completeness matters. Use the site's Atom feeds only when the user asks to subscribe or monitor new papers.
-

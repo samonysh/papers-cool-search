@@ -12,7 +12,7 @@ An agent skill for discovering research papers through [papers.cool](https://pap
 - Maps common AI/ML topics to arXiv categories, including category unions and exclusions.
 - Returns JSON records with `title`, `abstract`, `papers_cool_url`, and `source_url`, plus author, subject, publication, and collection metadata when available.
 - Supports transparent local preference ranking through `--prefer`; preference terms are never sent to papers.cool.
-- Supports an explicit, one-hop `[REL]` expansion from a supplied paper or up to three first-round results, with seed and query provenance in JSON.
+- Supports an explicit, one-hop `[REL]` expansion from a supplied paper or up to five first-round results, with seed and query provenance in JSON.
 - Distinguishes preprints from venue papers and preserves both links when a work has multiple versions.
 
 ## Install
@@ -84,7 +84,7 @@ Example output shape:
 
 ## Responsible use
 
-papers.cool is a personal website, not a bulk-data API. This project uses one request at a time, waits three seconds between every request, limits an invocation to 20 requests, caps each result page at 50 cards and REL expansion at three seeds, caps HTML responses at 2 MiB, and never retries automatically. See [the endpoint reference](references/public-endpoints.md) for the complete policy.
+papers.cool is a personal website, not a bulk-data API. This project uses one request at a time, waits three seconds between every request, limits an invocation to 20 requests, caps each result page at 50 cards and REL expansion at five seeds, caps HTML responses at 2 MiB, and never retries automatically. See [the endpoint reference](references/public-endpoints.md) for the complete policy.
 
 ## About `[REL]`
 

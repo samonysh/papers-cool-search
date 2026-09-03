@@ -240,7 +240,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--date", help="arXiv date in YYYY-MM-DD")
     parser.add_argument("--sort", help="Pass-through site sort value")
     parser.add_argument("--prefer", help="Comma-separated local preference terms; never sent to papers.cool")
-    parser.add_argument("--related-top", type=int, default=0, help="Expand first-round papers through [REL] (0–3; default: 0)")
+    parser.add_argument("--related-top", type=int, default=0, help="Expand first-round papers through [REL] (0–5; default: 0)")
     args = parser.parse_args()
     if args.mode == "search":
         if args.value is not None and args.query is None:
@@ -256,8 +256,8 @@ def parse_args() -> argparse.Namespace:
             parser.error(str(error))
     elif not args.value:
         parser.error(f"{args.mode} requires a category expression or venue edition")
-    if args.show < 1 or args.show > 50 or args.skip < 0 or args.related_top < 0 or args.related_top > 3:
-        parser.error("show must be 1–50, skip must be non-negative, and related-top must be 0–3")
+    if args.show < 1 or args.show > 50 or args.skip < 0 or args.related_top < 0 or args.related_top > 5:
+        parser.error("show must be 1–50, skip must be non-negative, and related-top must be 0–5")
     if args.mode == "related" and args.related_top:
         parser.error("related already performs one REL expansion; omit --related-top")
     return args

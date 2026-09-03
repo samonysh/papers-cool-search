@@ -12,7 +12,7 @@ This is a personal site, and its project history notes anti-scraping measures. T
 - Request **10 results by default** and at most **50** per page. Prefer a narrower query/category to raising `show` or paginating deeply.
 - Do not automatically retry failures, probe URL variants, crawl paper-detail pages, or bulk-download PDFs. A transient failure is one failed request; report it and wait for user direction.
 
-The helper makes one GET per invocation for a single collection. Its default cross-source `search` makes two serial GET requests (arXiv, then Venue), with a fixed three-second gap. It rejects `show > 50`, limits `--related-top` to three seeds, counts all requests in the invocation, and refuses HTML bodies larger than 2 MiB. These safeguards limit a mistaken invocation, while the session-wide request budget is enforced by the Skill workflow.
+The helper makes one GET per invocation for a single collection. Its default cross-source `search` makes two serial GET requests (arXiv, then Venue), with a fixed three-second gap. It rejects `show > 50`, limits `--related-top` to five seeds, counts all requests in the invocation, and refuses HTML bodies larger than 2 MiB. These safeguards limit a mistaken invocation, while the session-wide request budget is enforced by the Skill workflow.
 
 ## Safe, read-only routes
 
@@ -51,7 +51,7 @@ python scripts/papers_cool_fetch.py related https://papers.cool/arxiv/2506.18896
 python scripts/papers_cool_fetch.py search "multimodal agent" --related-top 2 --show 10
 ```
 
-`related` first retrieves the supplied seed card, then performs exactly one same-collection keyword search. `--related-top` expands at most the selected number of first-round records; its default is `0` and its hard limit is `3`. It never treats related results as new seeds. Output retains initial records with `relation_degree: 0`; related results have `relation_degree: 1` and a `related_from` object containing the seed link and keywords. Duplicate records are collapsed while preserving all REL provenance.
+`related` first retrieves the supplied seed card, then performs exactly one same-collection keyword search. `--related-top` expands at most the selected number of first-round records; its default is `0` and its hard limit is `5`. It never treats related results as new seeds. Output retains initial records with `relation_degree: 0`; related results have `relation_degree: 1` and a `related_from` object containing the seed link and keywords. Duplicate records are collapsed while preserving all REL provenance.
 
 This is keyword-based relevance discovery. It must not be described as a citation relationship, paper-reference graph, or semantic-similarity result.
 
@@ -70,4 +70,3 @@ The same client code exposes state-changing or potentially costly endpoints. Do 
 - `POST /config` submits user configuration.
 
 These routes are implementation details, may require browser state or change without notice, and are outside a read-only paper-discovery workflow.
-
