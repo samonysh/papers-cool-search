@@ -1,0 +1,6 @@
+interface:
+  display_name: "Papers Cool Search"
+  short_description: "Discover arXiv and top-conference papers via papers.cool"
+  default_prompt: "Use papers.cool to find and summarize papers for this topic."
+
+
