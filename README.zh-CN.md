@@ -72,9 +72,24 @@ references/source-guide.md       # 覆盖范围、主题和分类映射
 references/public-endpoints.md   # 公开路由、JSON 字段、访问限制
 ```
 
+## 引用与致谢
+
+本项目是基于 [Cool Papers / papers.cool](https://papers.cool/) 提供的论文发现服务，以及 [bojone/papers.cool](https://github.com/bojone/papers.cool) 仓库维护的产品说明所开发的独立适配。感谢维护者和贡献者提供该网站及其公开的论文发现路由。
+
+如果本 Skill 或通过 papers.cool 获取的数据实质性地用于论文、报告或软件成果，请引用该服务，并保留结果中 `source_url` 所对应的原始论文链接：
+
+```bibtex
+@misc{paperscool,
+  author       = {bojone},
+  title        = {Cool Papers: Immersive Paper Discovery},
+  howpublished = {\url{https://papers.cool/}},
+  note         = {Accessed 2026-09-03}
+}
+```
+
 ## 注意事项
 
-Venue 集合为人工整理，可能有遗漏或元数据错误。需要准确确认 DOI、出版状态、PDF 版本时，应再访问结果中的 `source_url`。本项目为独立适配，和 papers.cool 无隶属关系。
+Venue 集合为人工整理，可能有遗漏或元数据错误。需要准确确认 DOI、出版状态、PDF 版本时，应再访问结果中的 `source_url`。本项目为独立适配，和 papers.cool 无隶属关系，也不代表获得其维护者的背书。
 
 ## 许可证
 

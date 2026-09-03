@@ -87,9 +87,24 @@ references/source-guide.md       # Collection coverage and topic/category routin
 references/public-endpoints.md   # Public routes, JSON schema, and request policy
 ```
 
+## Citation and acknowledgement
+
+This independent integration depends on the paper-discovery service provided by [Cool Papers / papers.cool](https://papers.cool/) and the product documentation maintained in the [bojone/papers.cool](https://github.com/bojone/papers.cool) repository. Thank you to its maintainer and contributors for making the site and its public research-discovery routes available.
+
+If this skill or data obtained through papers.cool contributes materially to a publication, report, or software artifact, cite the service and preserve the original paper URLs returned in `source_url`:
+
+```bibtex
+@misc{paperscool,
+  author       = {bojone},
+  title        = {Cool Papers: Immersive Paper Discovery},
+  howpublished = {\url{https://papers.cool/}},
+  note         = {Accessed 2026-09-03}
+}
+```
+
 ## Notes
 
-papers.cool's Venue collection is curated and may have gaps. The helper reports the original canonical URL from every card, but publication status, DOI, and PDF version should be verified at that original source when precision matters. This project is an independent integration and is not affiliated with papers.cool.
+papers.cool's Venue collection is curated and may have gaps. The helper reports the original canonical URL from every card, but publication status, DOI, and PDF version should be verified at that original source when precision matters. This project is an independent integration, is not affiliated with papers.cool, and does not imply endorsement by its maintainer.
 
 ## License
 
