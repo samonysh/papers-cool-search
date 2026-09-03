@@ -14,6 +14,8 @@ python scripts/papers_cool_fetch.py arxiv cs.LG --show 10
 python scripts/papers_cool_fetch.py search "retrieval augmented generation" --show 10
 python scripts/papers_cool_fetch.py venue NeurIPS.2025 --show 20
 python scripts/papers_cool_fetch.py search "multimodal agent" --prefer "agent,planning,vision" --show 10
+python scripts/papers_cool_fetch.py related arxiv/2506.18896 --show 10
+python scripts/papers_cool_fetch.py search "multimodal agent" --related-top 2 --show 10
 ```
 
 Read [references/public-endpoints.md](references/public-endpoints.md) before adding a new retrieval mode or calling an endpoint directly. The endpoints are public web routes rather than a documented JSON API. Follow its request budget: one request at a time, wait at least three seconds between requests, cap a research session at 20 list/search requests, and do not retry failures automatically. Stop at the cap and ask the user whether to continue.
@@ -29,6 +31,7 @@ Clarify only if it materially changes the result. Otherwise infer the scope from
 - For accepted work in a named supported conference, use `https://papers.cool/venue/<venue>.<year>` (for example, `NeurIPS.2025`). `https://papers.cool/venue/<venue>` resolves to its newest indexed edition. Read the venue notes in the source guide before presenting it as exhaustive.
 - The direct helper's default `search` mode calls both `/arxiv/search` and `/venue/search`, serially with the required delay. Its `--branch arxiv` or `--branch venue` switch is only for an explicitly scoped request. The onsite index searches title and abstract text.
 - papers.cool's browser **Prefer** feature is personal browser-local storage. In automated work, ask for or infer a small set of user-approved preference terms and pass them as `--prefer "term1,term2"`. The helper performs transparent client-side ranking and writes each paper's `preference_score`; it does not claim to reproduce the user's private browser profile.
+- papers.cool's **[REL]** control opens a same-collection `search?query=<card keywords>` page. It is useful for a bounded, one-hop related-paper expansion, but it is a card-keyword search—not a citation graph, co-citation result, or embedding-based similarity score. Use `related arxiv/<id>` (or a papers.cool paper URL) for a supplied seed. For a first-round list, require an explicit `--related-top 1` through `3`; the default is `0`. Never run REL recursively.
 
 ## Gather and verify
 
@@ -50,10 +53,9 @@ Give a compact shortlist first, followed by one detailed entry per paper. For ev
 
 State the retrieval route and date. Distinguish **arXiv preprints** from **peer-reviewed venue papers**. Do not infer peer-review status from an arXiv category, and do not assert that a category/venue page is exhaustive beyond what the site itself represents.
 
-When data will feed another tool, return the normalized JSON directly or attach it after the human-readable shortlist. Each `papers` object must include at least `title`, `abstract`, `papers_cool_url`, and `source_url`; normally also include `id`, `source_collection`, `authors`, `subjects`, `published`, and `preference_score` when preferences were applied.
+When data will feed another tool, return the normalized JSON directly or attach it after the human-readable shortlist. Each `papers` object must include at least `title`, `abstract`, `papers_cool_url`, and `source_url`; normally also include `id`, `source_collection`, `authors`, `subjects`, `published`, and `preference_score` when preferences were applied. A one-hop REL result has `relation_degree: 1` and `related_from` with its seed URL and exact keyword query; initial candidates have `relation_degree: 0`.
 
 ## Freshness and coverage limits
 
 papers.cool mirrors arXiv updates with a typical delay of up to about ten minutes, normally updating around 10:00 Beijing time on weekdays; schedules can shift and there are no weekend or some holiday updates. Its historical arXiv records are substantial but not guaranteed complete, and its conference collections are manually curated. Mention either limitation when freshness or completeness matters. Use the site's Atom feeds only when the user asks to subscribe or monitor new papers.
-
 

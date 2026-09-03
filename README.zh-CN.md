@@ -12,6 +12,7 @@
 - 为 AI、机器学习、自然语言处理、视觉、检索等主题映射 arXiv 分类，并支持分类并集、差集。
 - 每篇论文至少返回 `title`、`abstract`、`papers_cool_url` 和 `source_url`；同时尽可能返回作者、分类、发布时间与来源集合。
 - 可通过 `--prefer` 进行本地、可解释的偏好关键词排序；偏好词不会被发送给 papers.cool。
+- 支持从给定论文或至多三篇首轮结果显式进行一度 `[REL]` 扩展，并在 JSON 中保留种子和查询溯源。
 - 区分预印本和会议论文；若同一工作存在多个版本，保留相应链接。
 
 ## 安装
@@ -46,21 +47,31 @@ python scripts/papers_cool_fetch.py venue NeurIPS.2025 --show 10
 
 # 本地偏好排序
 python scripts/papers_cool_fetch.py search "multimodal agent" --prefer "agent,planning,vision" --show 10
+
+# 从指定论文进行一度相关论文扩展
+python scripts/papers_cool_fetch.py related arxiv/2506.18896 --show 10
+
+# 仅扩展首轮的前两篇结果（默认不扩展）
+python scripts/papers_cool_fetch.py search "multimodal agent" --related-top 2 --show 10
 ```
 
-输出是一个 JSON 对象，其中 `sources` 记录检索路由、`papers` 是论文数组。每一项同时包含 papers.cool 页面链接和原始 arXiv、OpenReview、ACL Anthology、论文集或期刊链接，便于后续转为 Markdown、CSV 或其他工作流数据。
+输出是一个 JSON 对象，其中 `sources` 记录检索路由、`request_count` 记录实际请求数、`papers` 是论文数组。每一项同时包含 papers.cool 页面链接和原始 arXiv、OpenReview、ACL Anthology、论文集或期刊链接，便于后续转为 Markdown、CSV 或其他工作流数据。一度相关结果标记为 `relation_degree: 1`，并以 `related_from` 记录种子链接和关键词查询。
 
 ## 友好访问策略
 
 papers.cool 是个人维护的网站，不应被当作批量数据 API。本项目强制或约定：
 
-- 单线程请求；双源搜索中的两次请求间隔 3 秒；
-- 每个研究任务最多 20 次列表/搜索请求；
+- 单线程请求；任意两次请求间隔至少 3 秒；
+- 每次调用最多 20 次请求；`REL` 扩展最多 3 个种子；
 - 默认 10 篇、每页最多 50 篇；HTML 响应最大 2 MiB；
 - 不自动重试、不并发、不深度翻页、不批量拉取论文详情或 PDF；
 - 不调用 star、Kimi、config 等会造成状态变化或额外计算的端点。
 
 完整端点说明见 [references/public-endpoints.md](references/public-endpoints.md)。
+
+## 关于 `[REL]`
+
+网站的 `[REL]` 会读取论文卡片的关键词属性，并以这些关键词在同一个集合中打开搜索页面。本项目如实复现该行为：输出在 `related_from` 中记录种子与查询，且绝不把相关结果再次作为种子扩展。它是基于关键词的相关性发现，不是引用关系网络，也不是向量语义相似度结果。
 
 ## 目录结构
 

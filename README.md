@@ -12,6 +12,7 @@ An agent skill for discovering research papers through [papers.cool](https://pap
 - Maps common AI/ML topics to arXiv categories, including category unions and exclusions.
 - Returns JSON records with `title`, `abstract`, `papers_cool_url`, and `source_url`, plus author, subject, publication, and collection metadata when available.
 - Supports transparent local preference ranking through `--prefer`; preference terms are never sent to papers.cool.
+- Supports an explicit, one-hop `[REL]` expansion from a supplied paper or up to three first-round results, with seed and query provenance in JSON.
 - Distinguishes preprints from venue papers and preserves both links when a work has multiple versions.
 
 ## Install
@@ -50,6 +51,12 @@ python scripts/papers_cool_fetch.py venue NeurIPS.2025 --show 10
 
 # Local, reproducible preference ranking
 python scripts/papers_cool_fetch.py search "multimodal agent" --prefer "agent,planning,vision" --show 10
+
+# One-hop related papers for a supplied seed
+python scripts/papers_cool_fetch.py related arxiv/2506.18896 --show 10
+
+# Expand only the top two first-round candidates (disabled unless requested)
+python scripts/papers_cool_fetch.py search "multimodal agent" --related-top 2 --show 10
 ```
 
 Example output shape:
@@ -60,6 +67,7 @@ Example output shape:
     "arxiv": "https://papers.cool/arxiv/search?...",
     "venue": "https://papers.cool/venue/search?..."
   },
+  "request_count": 2,
   "count": 2,
   "papers": [
     {
@@ -67,7 +75,8 @@ Example output shape:
       "abstract": "...",
       "papers_cool_url": "https://papers.cool/arxiv/2401.00001",
       "source_url": "https://arxiv.org/abs/2401.00001",
-      "source_collection": "arxiv"
+      "source_collection": "arxiv",
+      "relation_degree": 0
     }
   ]
 }
@@ -75,7 +84,11 @@ Example output shape:
 
 ## Responsible use
 
-papers.cool is a personal website, not a bulk-data API. This project uses one request at a time, waits three seconds between the two requests of a cross-source search, limits a session to 20 list/search requests, caps each result page at 50 cards, caps HTML responses at 2 MiB, and never retries automatically. See [the endpoint reference](references/public-endpoints.md) for the complete policy.
+papers.cool is a personal website, not a bulk-data API. This project uses one request at a time, waits three seconds between every request, limits an invocation to 20 requests, caps each result page at 50 cards and REL expansion at three seeds, caps HTML responses at 2 MiB, and never retries automatically. See [the endpoint reference](references/public-endpoints.md) for the complete policy.
+
+## About `[REL]`
+
+The site’s `[REL]` control reads a paper card’s keyword attribute and opens a same-collection search using those keywords. This project mirrors that behavior, returns the seed URL and query in `related_from`, and never expands a related result again. It is keyword-based relevance discovery, not a citation graph or an embedding-based similarity claim.
 
 ## Project layout
 
