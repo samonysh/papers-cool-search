@@ -57,6 +57,46 @@ python scripts/papers_cool_fetch.py search "multimodal agent" --related-top 2 --
 
 输出是一个 JSON 对象，其中 `sources` 记录检索路由、`request_count` 记录实际请求数、`papers` 是论文数组。每一项同时包含 papers.cool 页面链接和原始 arXiv、OpenReview、ACL Anthology、论文集或期刊链接，便于后续转为 Markdown、CSV 或其他工作流数据。一度相关结果标记为 `relation_degree: 1`，并以 `related_from` 记录种子链接和关键词查询。
 
+### 实际 `[REL]` 运行示例
+
+以下是于 2026-09-03 真实运行所得的关键字段快照；网站索引更新后，返回结果可能变化：
+
+```bash
+python scripts/papers_cool_fetch.py related arxiv/2506.18896 --show 3
+```
+
+```json
+{
+  "sources": {
+    "seed:arxiv:2506.18896": "https://papers.cool/arxiv/2506.18896",
+    "related:arxiv:2506.18896": "https://papers.cool/arxiv/search?query=prm%2Creasonflux%2Cprms%2Ctrajectory%2Creward%2Creasoning%2Cthought%2Cmath500%2Caime%2Cgpqa&highlight=1&show=3"
+  },
+  "request_count": 2,
+  "count": 3,
+  "papers": [
+    {
+      "id": "2506.18896",
+      "title": "ReasonFlux-PRM: Trajectory-Aware PRMs for Long Chain-of-Thought Reasoning in LLMs",
+      "papers_cool_url": "https://papers.cool/arxiv/2506.18896",
+      "source_url": "https://arxiv.org/abs/2506.18896",
+      "relation_degree": 0
+    },
+    {
+      "id": "2502.06772",
+      "title": "ReasonFlux: Hierarchical LLM Reasoning via Scaling Thought Templates",
+      "papers_cool_url": "https://papers.cool/arxiv/2502.06772",
+      "source_url": "https://arxiv.org/abs/2502.06772",
+      "relation_degree": 1,
+      "related_from": [{
+        "type": "papers_cool_rel_keyword_search",
+        "seed_id": "2506.18896",
+        "keywords": "prm,reasonflux,prms,trajectory,reward,reasoning,thought,math500,aime,gpqa"
+      }]
+    }
+  ]
+}
+```
+
 ## 友好访问策略
 
 papers.cool 是个人维护的网站，不应被当作批量数据 API。本项目强制或约定：

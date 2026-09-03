@@ -82,6 +82,46 @@ Example output shape:
 }
 ```
 
+### Actual `[REL]` run
+
+The following is a selected-field snapshot from an actual run on 2026-09-03 (results can change as the site index changes):
+
+```bash
+python scripts/papers_cool_fetch.py related arxiv/2506.18896 --show 3
+```
+
+```json
+{
+  "sources": {
+    "seed:arxiv:2506.18896": "https://papers.cool/arxiv/2506.18896",
+    "related:arxiv:2506.18896": "https://papers.cool/arxiv/search?query=prm%2Creasonflux%2Cprms%2Ctrajectory%2Creward%2Creasoning%2Cthought%2Cmath500%2Caime%2Cgpqa&highlight=1&show=3"
+  },
+  "request_count": 2,
+  "count": 3,
+  "papers": [
+    {
+      "id": "2506.18896",
+      "title": "ReasonFlux-PRM: Trajectory-Aware PRMs for Long Chain-of-Thought Reasoning in LLMs",
+      "papers_cool_url": "https://papers.cool/arxiv/2506.18896",
+      "source_url": "https://arxiv.org/abs/2506.18896",
+      "relation_degree": 0
+    },
+    {
+      "id": "2502.06772",
+      "title": "ReasonFlux: Hierarchical LLM Reasoning via Scaling Thought Templates",
+      "papers_cool_url": "https://papers.cool/arxiv/2502.06772",
+      "source_url": "https://arxiv.org/abs/2502.06772",
+      "relation_degree": 1,
+      "related_from": [{
+        "type": "papers_cool_rel_keyword_search",
+        "seed_id": "2506.18896",
+        "keywords": "prm,reasonflux,prms,trajectory,reward,reasoning,thought,math500,aime,gpqa"
+      }]
+    }
+  ]
+}
+```
+
 ## Responsible use
 
 papers.cool is a personal website, not a bulk-data API. This project uses one request at a time, waits three seconds between every request, limits an invocation to 20 requests, caps each result page at 50 cards and REL expansion at five seeds, caps HTML responses at 2 MiB, and never retries automatically. See [the endpoint reference](references/public-endpoints.md) for the complete policy.
