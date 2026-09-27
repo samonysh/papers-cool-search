@@ -16,9 +16,19 @@ python scripts/papers_cool_fetch.py venue NeurIPS.2025 --show 20
 python scripts/papers_cool_fetch.py search "multimodal agent" --prefer "agent,planning,vision" --show 10
 python scripts/papers_cool_fetch.py related arxiv/2506.18896 --show 10
 python scripts/papers_cool_fetch.py search "multimodal agent" --related-top 2 --show 10
+python scripts/papers_cool_fetch.py search "multimodal agent" --show 10 --fetch-pdf
 ```
 
 Read [references/public-endpoints.md](references/public-endpoints.md) before adding a new retrieval mode or calling an endpoint directly. The endpoints are public web routes rather than a documented JSON API. Follow its request budget: one request at a time, wait at least three seconds between requests, cap a research session at 20 list/search requests, and do not retry failures automatically. Stop at the cap and ask the user whether to continue.
+
+## Optional add-ons (only on request)
+
+An ordinary search must run **neither** of the following. Use each one only when the user explicitly asks for it, and say plainly if a prerequisite is missing.
+
+1. **Original PDFs** — `--fetch-pdf`. It derives a direct PDF from `source_url`/`source_urls` first and falls back to the OpenAlex content download (needs the key; about $0.01 per PDF). It writes `<pdf-dir>/<YYYYMMDD-HHMMSS>-<topic>/<NN>-<identifier>-<title-slug>/paper.pdf`, adds `pdf_path` and `pdf_source_url` per record and `pdf_dir` to the output, and is best-effort: report failures instead of claiming every PDF was fetched. See [references/public-endpoints.md](references/public-endpoints.md) for `--pdf-dir`/`--pdf-topic` and the limits.
+2. **Chinese-translated PDFs** — `scripts/hjfy_zh_pdf.py`, **arXiv papers only**, via [hjfy.top](https://hjfy.top). Drive this with the **built-in browser by default**; use an external browser only when the built-in one is unavailable. Creating a translation needs a logged-in session there, so check the login state first: if the user is not logged in, hand the browser over to them (`browser_waiting_for_user_interaction`) and continue only after they confirm. Then `plan --papers papers.json --out zh_plan.json`, open every `hjfy_url` in the browser to start the translations, wait (typically 1–10 minutes), and `fetch --plan zh_plan.json` to save each result as `paper.zh.pdf` in that paper's folder. A `等待超时` error just means "not finished yet—re-run `fetch`". See [references/zh-pdf.md](references/zh-pdf.md) for the verified endpoints and statuses.
+
+OpenAlex enrichment is **not** a flag and **not** an opt-in: whenever an OpenAlex API key is configured (`OPENALEX_API_KEY`, or `config.json` next to `SKILL.md`, overridable with `--config`), the helper automatically resolves each paper on the read-only [OpenAlex API](https://help.openalex.org/api/) and adds `openalex_url` plus a merged `source_urls` array. With no key configured it does nothing and makes no OpenAlex request. Never hard-code or print the key.
 
 ## Choose the discovery route
 
@@ -53,7 +63,7 @@ Give a compact shortlist first, followed by one detailed entry per paper. For ev
 
 State the retrieval route and date. Distinguish **arXiv preprints** from **peer-reviewed venue papers**. Do not infer peer-review status from an arXiv category, and do not assert that a category/venue page is exhaustive beyond what the site itself represents.
 
-When data will feed another tool, return the normalized JSON directly or attach it after the human-readable shortlist. Each `papers` object must include at least `title`, `abstract`, `papers_cool_url`, and `source_url`; normally also include `id`, `source_collection`, `authors`, `subjects`, `published`, and `preference_score` when preferences were applied. A one-hop REL result has `relation_degree: 1` and `related_from` with its seed URL and exact keyword query; initial candidates have `relation_degree: 0`.
+When data will feed another tool, return the normalized JSON directly or attach it after the human-readable shortlist. Each `papers` object must include at least `title`, `abstract`, `papers_cool_url`, and `source_url`; normally also include `id`, `source_collection`, `authors`, `subjects`, `published`, and `preference_score` when preferences were applied. When OpenAlex enrichment ran, the object additionally carries `openalex_url` and `source_urls`, an array that preserves the original `source_url` and appends OpenAlex's other landing pages; never replace or drop `source_url`. When PDFs were requested, each record that succeeded also carries `pdf_path` and `pdf_source_url`, and the top-level output carries `pdf_dir`. A one-hop REL result has `relation_degree: 1` and `related_from` with its seed URL and exact keyword query; initial candidates have `relation_degree: 0`.
 
 ## Freshness and coverage limits
 
