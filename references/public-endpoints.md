@@ -61,6 +61,58 @@ The helper outputs one JSON object with `sources`, `request_count`, `count`, `pa
 
 The site browser's Prefer setting is stored in the reader's browser. The helper instead accepts `--prefer "term1,term2"`, scores term occurrences in title/abstract/authors/subjects, and sorts descending by `preference_score`. Preference ranking is local and transparent; it does not send preference terms to the site as a server-side sort query.
 
+## Automatic OpenAlex enrichment
+
+When an OpenAlex API key is configured, the helper automatically resolves each paper to its OpenAlex work, records that work's URL, and merges the work's other landing pages into the record. With no key configured this step is skipped entirely and no OpenAlex request is made. The lookups use the public read-only API described at [help.openalex.org/api](https://help.openalex.org/api/).
+
+**Configuration.** The key is read from the `OPENALEX_API_KEY` environment variable first, then from the Skill's own `config.json` (gitignored), overridable with `--config <path>`:
+
+```json
+{
+  "openalex_api_key": "your-key-here"
+}
+```
+
+A nested `{"openalex": {"api_key": "..."}}` object is also accepted. If a config file exists but cannot be parsed, the helper reports it in `errors` instead of silently continuing.
+
+**Lookup order.** Identifiers are tried from most to least reliable, and the first hit wins:
+
+1. a DOI found in `source_url` → the `works/doi:<doi>` singleton;
+2. an arXiv ID found in `source_url` → `works?filter=locations.landing_page_url:...` for the exact `http://`/`https://` arXiv landing URL;
+3. otherwise a `works?search=<title>` request whose candidates must match the normalized title exactly.
+
+A `404` from a singleton lookup means "not in OpenAlex" and is not an error; genuine retrieval failures for a paper are appended to `errors` with `source_collection: "openalex"`.
+
+**Added fields.** `source_url` is left untouched for backward compatibility. On a match the record gains:
+
+- `openalex_url` — the OpenAlex web URL, e.g. `https://openalex.org/W2626778328`;
+- `source_urls` — a de-duplicated array that starts with the original `source_url` and appends every distinct `landing_page_url` OpenAlex knows for the same work (preprint server, DOI, repository, publisher, …).
+
+**Budget.** Enrichment is bounded to 50 paper lookups per invocation and rejects responses larger than 2 MiB. Following OpenAlex's own guidance for flaky connections, a *transport-layer* failure (connection reset, SSL EOF, timeout) is retried up to two times with exponential backoff; HTTP responses (including 4xx/5xx) and malformed payloads are never retried. This budget is separate from the papers.cool request cap above.
+
+## Optional PDF retrieval (`--fetch-pdf`)
+
+PDF download is **opt-in**: it runs only with `--fetch-pdf`, which the Skill uses only when the user explicitly asks to download or save the papers' PDFs. It is best-effort—some papers cannot be retrieved, and a failure never aborts the run.
+
+Everything is written under one timestamped run folder:
+
+```text
+<pdf-dir>/<YYYYMMDD-HHMMSS>-<topic-slug>/<NN>-<identifier>-<title-slug>/paper.pdf
+```
+
+- **Run folder** — `<time>-<topic>`, where the topic comes from `--pdf-topic` or, by default, the query/category/venue/seed. A numeric suffix is appended if the name already exists.
+- **Paper folder** — a zero-padded index, the paper's identifier when known, and a slug of its title, so every paper has a distinct folder.
+- **File name** — always `paper.pdf`, so the layout is uniform and each folder holds exactly one original PDF.
+
+Sources are tried in order and the first success wins:
+
+1. a direct PDF derived from `source_url`/`source_urls` **without fetching the landing page** — an arXiv `abs`/`pdf` URL → `https://arxiv.org/pdf/<id>`, an OpenReview `forum?id=` → `pdf?id=`, an ACL Anthology page → `.pdf`, or an existing `*.pdf` link;
+2. otherwise the OpenAlex content download, `https://content.openalex.org/works/<W-id>.pdf?api_key=<key>`, which needs the configured key and costs about $0.01 per PDF.
+
+Each record gains `pdf_path` (the saved file) and `pdf_source_url` (the source that worked; the API key is never written into it), and the top-level output gains `pdf_dir`. Failures are appended to `errors` with `source_collection: "pdf"`, and the paper's now-empty folder is removed; if nothing was saved, the run folder is removed too.
+
+Limits: at most 50 PDFs per invocation and 50 MiB per file, a one-second gap between downloads, and the same bounded transport retry as the enrichment calls. HTTP responses (for example, a 404 when OpenAlex has no cached PDF) and non-PDF bodies are recorded as failures without retrying.
+
 ## Do not call for retrieval
 
 The same client code exposes state-changing or potentially costly endpoints. Do not use them as part of a search Skill:
